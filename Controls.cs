@@ -29,7 +29,7 @@ public class Controls : MonoBehaviour
 	}
 	void updateServer(){
 		float h = Input.GetAxis ("Horizontal");
-		udpClient.sendMessage (transform.position.x+","+transform.position.y+";"+h);
+		udpClient.sendMessage (transform.position.x+","+transform.position.y+";"+(facingRight?1:0));
 	}
 	// Update is called once per frame
 	void Update ()
