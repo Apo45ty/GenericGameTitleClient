@@ -16,26 +16,24 @@ public class udpClient : MonoBehaviour {
 		Debug.Log ("Start");
 		SocketConnect ("127.0.0.1", 9090);
 		client.BeginReceive(new AsyncCallback(recv), null);
+		Application.runInBackground = true;
 	}
 	 void recv(IAsyncResult res)
 	{
 		IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, 0);
 		byte[] received = client.EndReceive(res, ref RemoteIpEndPoint);
 		responseData = System.Text.Encoding.ASCII.GetString(received, 0, received.Length);
+		Debug.Log("Received: " + responseData);  
 		if (listeners != null) {
 			for(int i=0;i<listeners.Length;i++){
 				listeners[i].UDPMessageReceived (responseData);
 			}
 		}
-		Debug.Log("Received: " + responseData);  
 
 		client.BeginReceive(new AsyncCallback(recv), null);
 	}
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetButtonDown ("Jump")) {
-			sendMessage ("jump");
-		}
 	}
 
 	void OnDisable(){
@@ -76,7 +74,7 @@ public class udpClient : MonoBehaviour {
 
 			// Send the message to the connected UdpServer. 
 			client.Send(data, data.Length);
-			Debug.Log("Sent: "+ message); 
+//			Debug.Log("Sent: "+ message); 
 		} 
 		catch (ArgumentNullException e) 
 		{

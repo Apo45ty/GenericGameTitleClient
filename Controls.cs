@@ -28,7 +28,8 @@ public class Controls : MonoBehaviour
 		InvokeRepeating("updateServer",serverInit,serverTimeout);
 	}
 	void updateServer(){
-		udpClient.sendMessage (rb2d.velocity.x+","+rb2d.velocity.y+";"+(jump?1:0));
+		float h = Input.GetAxis ("Horizontal");
+		udpClient.sendMessage (transform.position.x+","+transform.position.y+";"+h);
 	}
 	// Update is called once per frame
 	void Update ()
