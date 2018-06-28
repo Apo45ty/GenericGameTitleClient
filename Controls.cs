@@ -11,7 +11,7 @@ public class Controls : MonoBehaviour
 	public float moveForce = 365f;
 	public float maxSpeed = 5f;
 	public float jumpForce = 1000f;
-	public float serverInit=1f, serverTimeout=0.5f;
+	public float serverInit=1f, serverTimeout=0.5f,slideDuration=0.5f;
 	public Transform groundCheck;
 
 
@@ -67,8 +67,17 @@ public class Controls : MonoBehaviour
 			rb2d.AddForce (new Vector2 (0f, jumpForce));
 			jump = false;
 		}
+		if (Input.GetKeyDown(KeyCode.S)&&Mathf.Abs (h)>0)
+		{
+			Debug.Log ("Slide");
+			anim.SetTrigger ("Slide");
+			GetComponent<BoxCollider2D> ().enabled = false;
+			Invoke("EnableBoxCollider", slideDuration);
+		}
 	}
-
+	void EnableBoxCollider(){
+		GetComponent<BoxCollider2D> ().enabled = true;
+	}
 
 	void Flip ()
 	{
