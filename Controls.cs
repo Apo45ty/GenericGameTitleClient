@@ -8,6 +8,8 @@ public class Controls : MonoBehaviour
 
 	[HideInInspector] public bool facingRight = true;
 	[HideInInspector] public bool jump = false;
+	[HideInInspector] public bool duck = false;
+	[HideInInspector] public bool slide = false;
 	public float moveForce = 365f;
 	public float maxSpeed = 5f;
 	public float jumpForce = 1000f;
@@ -45,34 +47,46 @@ public class Controls : MonoBehaviour
 	void FixedUpdate ()
 	{
 		float h = Input.GetAxis ("Horizontal");
-
-		if (h == 0)
-			rb2d.velocity = new Vector2 (0, rb2d.velocity.y);
-		
 		anim.SetFloat ("Speed", Mathf.Abs (h));
 
-		if (h * rb2d.velocity.x < maxSpeed)
+		//Stop movement if ducking
+		if (duck)
+			h = 0;
+
+		//Apply velocity
+		if (h * rb2d.velocity.x < maxSpeed )
 			rb2d.AddForce (Vector2.right * h * moveForce);
 
+		//Limit velocity
+		if (h == 0&&!slide)
+			rb2d.velocity = new Vector2 (0, rb2d.velocity.y);
 		if (Mathf.Abs (rb2d.velocity.x) > maxSpeed)
 			rb2d.velocity = new Vector2 (Mathf.Sign (rb2d.velocity.x) * maxSpeed, rb2d.velocity.y);
-
+		//Flip sprites
 		if (h > 0 && !facingRight)
 			Flip ();
 		else if (h < 0 && facingRight)
 			Flip ();
-
+		//Apply Jump Foce
 		if (jump) {
 			anim.SetTrigger ("Jump");
 			rb2d.AddForce (new Vector2 (0f, jumpForce));
 			jump = false;
 		}
-		if (Input.GetKeyDown(KeyCode.S)&&Mathf.Abs (h)>0)
-		{
+		//Ducking mechanic
+		duck = false;
+		slide = false;
+		anim.SetBool ("Duck", false);
+		if (Input.GetKeyDown (KeyCode.S) && Mathf.Abs (h) > 0) {
+			slide = true;
 			Debug.Log ("Slide");
 			anim.SetTrigger ("Slide");
 			GetComponent<BoxCollider2D> ().enabled = false;
-			Invoke("EnableBoxCollider", slideDuration);
+			Invoke ("EnableBoxCollider", slideDuration);
+		} else if (Input.GetKey (KeyCode.S)&& Mathf.Abs (h) < 0.01) {
+			duck = true;
+			Debug.Log ("Duck");
+			anim.SetBool ("Duck", true);
 		}
 	}
 	void EnableBoxCollider(){
