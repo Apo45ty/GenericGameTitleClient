@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class arrowcontroller : MonoBehaviour {
-	public float oldx=0, oldy=0, x, y;
+	[HideInInspector] public float oldx=0, oldy=0, x, y;
 
 	// Use this for initialization
 	void Start () {
