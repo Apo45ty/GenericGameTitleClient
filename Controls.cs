@@ -12,7 +12,7 @@ public class Controls : MonoBehaviour
 	[HideInInspector] public bool slide = false;
 	[HideInInspector] public bool wallgrab = false;
 	public float moveForce = 365f;
-	public float maxSpeed = 5f;
+	public float maxSpeed = 3f,maxSpeedVertical=15;
 	public float jumpForce = 1000f,wallJumpMultiplier = 2f;
 	public float serverInit=1f, serverTimeout=0.5f,slideDuration=0.5f;
 	public Transform groundCheck;
@@ -63,6 +63,9 @@ public class Controls : MonoBehaviour
 			rb2d.velocity = new Vector2 (0, rb2d.velocity.y);
 		if (Mathf.Abs (rb2d.velocity.x) > maxSpeed)
 			rb2d.velocity = new Vector2 (Mathf.Sign (rb2d.velocity.x) * maxSpeed, rb2d.velocity.y);
+		if (Mathf.Abs (rb2d.velocity.y) > maxSpeedVertical)
+			rb2d.velocity = new Vector2 (rb2d.velocity.x,Mathf.Sign (rb2d.velocity.y) * maxSpeedVertical);
+		
 		//Flip sprites
 		if (h > 0 && !facingRight)
 			Flip ();
