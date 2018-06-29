@@ -10,9 +10,10 @@ public class Controls : MonoBehaviour
 	[HideInInspector] public bool jump = false;
 	[HideInInspector] public bool duck = false;
 	[HideInInspector] public bool slide = false;
+	[HideInInspector] public bool wallgrab = false;
 	public float moveForce = 365f;
 	public float maxSpeed = 5f;
-	public float jumpForce = 1000f;
+	public float jumpForce = 1000f,wallJumpMultiplier = 2f;
 	public float serverInit=1f, serverTimeout=0.5f,slideDuration=0.5f;
 	public Transform groundCheck;
 
@@ -39,7 +40,7 @@ public class Controls : MonoBehaviour
 		grounded = Physics2D.Linecast (transform.position, groundCheck.position, 1 << LayerMask.NameToLayer ("Ground"));
 		if(grounded)
 			anim.SetTrigger ("Land");
-		if (Input.GetButtonDown ("Jump") && grounded) {
+		if (Input.GetButtonDown ("Jump") && (grounded||wallgrab)) {
 			jump = true;
 		}
 	}
@@ -70,14 +71,14 @@ public class Controls : MonoBehaviour
 		//Apply Jump Foce
 		if (jump) {
 			anim.SetTrigger ("Jump");
-			rb2d.AddForce (new Vector2 (0f, jumpForce));
+			rb2d.AddForce (new Vector2 (0f, jumpForce*(wallgrab?wallJumpMultiplier:1)));
 			jump = false;
 		}
 		//Ducking mechanic
 		duck = false;
 		slide = false;
 		anim.SetBool ("Duck", false);
-		if (Input.GetKeyDown (KeyCode.S) && Mathf.Abs (h) > 0) {
+		if (Input.GetKey(KeyCode.S) && Mathf.Abs (h) > 0.1) {
 			slide = true;
 			Debug.Log ("Slide");
 			anim.SetTrigger ("Slide");
@@ -99,6 +100,20 @@ public class Controls : MonoBehaviour
 		Vector3 theScale = transform.localScale;
 		theScale.x *= -1;
 		transform.localScale = theScale;
+	}
+
+	void OnTriggerEnter2D(Collider2D collider)
+	{
+		Debug.Log ("TriggerEntered");
+		if (!grounded) {
+			wallgrab = true;
+			anim.SetBool ("WallGrab", true);
+		}
+	}
+	void OnTriggerExit2D(Collider2D collider) {
+		Debug.Log ("TriggerExit");
+		wallgrab = false;
+		anim.SetBool ("WallGrab", false);
 	}
 }
 	
