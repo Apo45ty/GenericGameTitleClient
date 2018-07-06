@@ -13,10 +13,10 @@ public class Controls : MonoBehaviour
 	[HideInInspector] public bool wallgrab = false;
 	public float moveForce = 365f;
 	public float maxSpeed = 3f,maxSpeedVertical=15;
-	public float jumpForce = 1000f,wallJumpMultiplier = 2f;
-	public float serverInit=1f, serverTimeout=0.5f,slideDuration=0.5f;
+	public float jumpForce = 1000f,wallJumpMultiplierY = 2f,wallJumpMultiplierX = 1.5f;
+	public float serverInit=1f, serverTimeout=0.5f,slideDuration=0.5f,wallJumpControlFreze=0.1f;
 	public Transform groundCheck;
-
+	private bool controlsFrozen = false;
 
 	private bool grounded = false;
 	private Animator anim;
@@ -47,6 +47,10 @@ public class Controls : MonoBehaviour
 
 	void FixedUpdate ()
 	{
+
+		if(controlsFrozen)
+			return;
+		//Get axis information and inform the animator
 		float h = Input.GetAxis ("Horizontal");
 		anim.SetFloat ("Speed", Mathf.Abs (h));
 
@@ -74,29 +78,41 @@ public class Controls : MonoBehaviour
 		//Apply Jump Foce
 		if (jump) {
 			anim.SetTrigger ("Jump");
-			rb2d.AddForce (new Vector2 (0f, jumpForce*(wallgrab?wallJumpMultiplier:1)));
+			if (wallgrab) {
+				rb2d.AddForce (new Vector2 ((facingRight?-1:1) * moveForce * wallJumpMultiplierX, jumpForce * wallJumpMultiplierY));
+				controlsFrozen = true;
+				Invoke ("DefrezeControls", wallJumpControlFreze);
+			} else 
+				rb2d.AddForce (new Vector2 (0, jumpForce));
+			
 			jump = false;
 		}
 		//Ducking mechanic
 		duck = false;
 		slide = false;
 		anim.SetBool ("Duck", false);
-		if (Input.GetKey(KeyCode.S) && Mathf.Abs (h) > 0.1) {
-			slide = true;
-			Debug.Log ("Slide");
-			anim.SetTrigger ("Slide");
+		if (Input.GetKey (KeyCode.S)) {
 			GetComponent<BoxCollider2D> ().enabled = false;
-			Invoke ("EnableBoxCollider", slideDuration);
-		} else if (Input.GetKey (KeyCode.S)&& Mathf.Abs (h) < 0.01) {
-			duck = true;
-			Debug.Log ("Duck");
-			anim.SetBool ("Duck", true);
-		}
+			if (Mathf.Abs (h) > 0.1) {
+				slide = true;
+				Debug.Log ("Slide");
+				anim.SetTrigger ("Slide");
+				Invoke ("EnableBoxCollider", slideDuration);
+			} else {
+				duck = true;
+				Debug.Log ("Duck");
+				anim.SetBool ("Duck", true);
+			}
+		} else if(!slide)
+			GetComponent<BoxCollider2D> ().enabled = true;
+		
 	}
 	void EnableBoxCollider(){
 		GetComponent<BoxCollider2D> ().enabled = true;
 	}
-
+	void DefrezeControls(){
+		controlsFrozen = false;
+	}
 	void Flip ()
 	{
 		facingRight = !facingRight;
