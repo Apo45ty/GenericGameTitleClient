@@ -1310,7 +1310,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 140151373}
   m_LocalRotation: {x: -0, y: -0, z: -0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: -0.37565288, y: 0.994055, z: -0.20247175}
+  m_LocalPosition: {x: -0.349, y: 0.994055, z: -0.20247175}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 635642945}
@@ -2828,9 +2828,9 @@ GameObject:
   - component: {fileID: 387380951}
   - component: {fileID: 387380950}
   - component: {fileID: 387380949}
-  - component: {fileID: 387380953}
   - component: {fileID: 387380954}
   - component: {fileID: 387380955}
+  - component: {fileID: 387380953}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2914,8 +2914,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d20fb75ffecc0f40b5e9d8989cf85fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xSpeed: 1
-  stop: 10
   player: {fileID: 1372269016}
 --- !u!114 &387380954
 MonoBehaviour:
@@ -12610,10 +12608,12 @@ MonoBehaviour:
   maxSpeed: 3
   maxSpeedVertical: 15
   jumpForce: 120
-  wallJumpMultiplier: 2
+  wallJumpMultiplierY: 1.62
+  wallJumpMultiplierX: 4
   serverInit: 1
   serverTimeout: 0.05
   slideDuration: 0.5
+  wallJumpControlFreze: 0.2
   groundCheck: {fileID: 1816458775}
 --- !u!61 &1372269026
 BoxCollider2D:
