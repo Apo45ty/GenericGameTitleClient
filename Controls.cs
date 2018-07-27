@@ -6,7 +6,7 @@ using UnityEngine;
 public class Controls : MonoBehaviour
 {
 
-	private bool facingRight = true;
+	private bool facingRight = false;
 	private bool jump = false;
 	private bool duck = false;
 	private bool slide = false;
