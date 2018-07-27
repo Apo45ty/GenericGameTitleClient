@@ -6,11 +6,12 @@ using UnityEngine;
 public class Controls : MonoBehaviour
 {
 
-	[HideInInspector] public bool facingRight = true;
-	[HideInInspector] public bool jump = false;
-	[HideInInspector] public bool duck = false;
-	[HideInInspector] public bool slide = false;
-	[HideInInspector] public bool wallgrab = false;
+	private bool facingRight = true;
+	private bool jump = false;
+	private bool duck = false;
+	private bool slide = false;
+	private bool wallgrab = false;
+	private float h;
 	public float moveForce = 365f;
 	public float maxSpeed = 3f,maxSpeedVertical=15;
 	public float jumpForce = 1000f,wallJumpMultiplierY = 2f,wallJumpMultiplierX = 1.5f;
@@ -31,7 +32,6 @@ public class Controls : MonoBehaviour
 		InvokeRepeating("updateServer",serverInit,serverTimeout);
 	}
 	void updateServer(){
-		float h = Input.GetAxis ("Horizontal");
 		udpClient.sendMessage (transform.position.x+","+transform.position.y+";"+(facingRight?1:0));
 	}
 	// Update is called once per frame
@@ -48,10 +48,10 @@ public class Controls : MonoBehaviour
 	void FixedUpdate ()
 	{
 
-		if(controlsFrozen)
+		if (controlsFrozen)
 			return;
 		//Get axis information and inform the animator
-		float h = Input.GetAxis ("Horizontal");
+		h = Input.GetAxis ("Horizontal");
 		anim.SetFloat ("Speed", Mathf.Abs (h));
 
 		//Stop movement if ducking
@@ -59,16 +59,16 @@ public class Controls : MonoBehaviour
 			h = 0;
 
 		//Apply velocity
-		if (h * rb2d.velocity.x < maxSpeed )
+		if (h * rb2d.velocity.x < maxSpeed)
 			rb2d.AddForce (Vector2.right * h * moveForce);
 
 		//Limit velocity
-		if (h == 0&&!slide)
+		if (h == 0 && !slide)
 			rb2d.velocity = new Vector2 (0, rb2d.velocity.y);
 		if (Mathf.Abs (rb2d.velocity.x) > maxSpeed)
 			rb2d.velocity = new Vector2 (Mathf.Sign (rb2d.velocity.x) * maxSpeed, rb2d.velocity.y);
 		if (Mathf.Abs (rb2d.velocity.y) > maxSpeedVertical)
-			rb2d.velocity = new Vector2 (rb2d.velocity.x,Mathf.Sign (rb2d.velocity.y) * maxSpeedVertical);
+			rb2d.velocity = new Vector2 (rb2d.velocity.x, Mathf.Sign (rb2d.velocity.y) * maxSpeedVertical);
 		
 		//Flip sprites
 		if (h > 0 && !facingRight)
@@ -79,35 +79,36 @@ public class Controls : MonoBehaviour
 		if (jump) {
 			anim.SetTrigger ("Jump");
 			if (wallgrab) {
-				rb2d.AddForce (new Vector2 ((facingRight?-1:1) * moveForce * wallJumpMultiplierX, jumpForce * wallJumpMultiplierY));
+				rb2d.AddForce (new Vector2 ((facingRight ? -1 : 1) * moveForce * wallJumpMultiplierX, jumpForce * wallJumpMultiplierY));
 				controlsFrozen = true;
 				Invoke ("DefrezeControls", wallJumpControlFreze);
-			} else 
+			} else
 				rb2d.AddForce (new Vector2 (0, jumpForce));
 			
 			jump = false;
 		}
 		//Ducking mechanic
 		duck = false;
-		slide = false;
 		anim.SetBool ("Duck", false);
-		if (Input.GetKey (KeyCode.S)) {
+		if(Input.GetKeyDown (KeyCode.S)){
 			GetComponent<BoxCollider2D> ().enabled = false;
-			if (Mathf.Abs (h) > 0.1) {
+			if (Mathf.Abs (h) > 0f) {
 				slide = true;
 				Debug.Log ("Slide");
 				anim.SetTrigger ("Slide");
-				Invoke ("EnableBoxCollider", slideDuration);
-			} else {
-				duck = true;
-				Debug.Log ("Duck");
-				anim.SetBool ("Duck", true);
+				Invoke ("DisableSlide", slideDuration);
 			}
+		} else if (Input.GetKey (KeyCode.S)&&!slide&&Mathf.Abs (h) == 0f) {
+			GetComponent<BoxCollider2D> ().enabled = false;
+			duck = true;
+			Debug.Log ("Duck");
+			anim.SetBool ("Duck", true);
 		} else if(!slide)
 			GetComponent<BoxCollider2D> ().enabled = true;
 		
 	}
-	void EnableBoxCollider(){
+	void DisableSlide(){
+		slide = false;
 		GetComponent<BoxCollider2D> ().enabled = true;
 	}
 	void DefrezeControls(){
@@ -124,7 +125,7 @@ public class Controls : MonoBehaviour
 	void OnTriggerEnter2D(Collider2D collider)
 	{
 		Debug.Log ("TriggerEntered");
-		if (!grounded) {
+		if (!grounded&&collider.gameObject.layer == LayerMask.NameToLayer ("Wall")) {
 			wallgrab = true;
 			anim.SetBool ("WallGrab", true);
 		}
